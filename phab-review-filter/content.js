@@ -227,18 +227,16 @@ function getRows() {
 
 // ── state ─────────────────────────────────────────────────────────────────────
 
-function getActive() {
-  const v = localStorage.getItem(STORAGE_KEY_ACTIVE);
-  return v === null ? true : v === 'true';
-}
-function setActive(v) { localStorage.setItem(STORAGE_KEY_ACTIVE, String(v)); }
+// active is always ON at page load — Alt+Shift+F is a temporary per-session
+// toggle only and does not persist across reloads or addon restarts.
+function setActive(v) { /* no-op: not persisted */ }
 
 function getThreshold() {
   const v = parseInt(localStorage.getItem(STORAGE_KEY_HOURS), 10);
   return isNaN(v) ? DEFAULT_HOURS : v;
 }
 
-let active = getActive();
+let active = true;
 
 // ── group detection ───────────────────────────────────────────────────────────
 // Returns true when the dom-core-reviewers group is in the reviewer list.
