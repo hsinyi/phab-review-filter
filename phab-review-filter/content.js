@@ -273,7 +273,7 @@ function applyFilter() {
 
   rows.forEach(row => {
     const link = row.querySelector('a.phui-oi-link');
-    const title = link ? link.textContent.trim().slice(0, 40) : '(no link)';
+    const title = (link ? (link.getAttribute('href') || '') + ' ' + link.textContent.trim().slice(0, 30) : '(no link)');
 
     if (!active) {
       row.classList.remove('praf-hidden');
