@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Phabricator Review Budget Tracker",
+  "version": "1.0",
+  "description": "Tracks monthly accept/request-changes actions against a review budget.",
+  "permissions": [
+    "*://phabricator.services.mozilla.com/*"
+  ],
+  "web_accessible_resources": ["interceptor.js"],
+  "content_scripts": [
+    {
+      "matches": ["*://phabricator.services.mozilla.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_start"
+    }
+  ]
+}

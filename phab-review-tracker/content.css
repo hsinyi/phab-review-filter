@@ -1,0 +1,40 @@
+#prat-badge {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 99999;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font: 13px/1.4 system-ui, sans-serif;
+  color: #24292f;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  min-width: 150px;
+  user-select: none;
+}
+
+#prat-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+#prat-bar-track {
+  height: 6px;
+  background: #eaecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+#prat-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .3s ease, background .3s ease;
+  background: #2da44e;
+}
+
+#prat-badge.prat-warn #prat-bar-fill { background: #d4a017; }
+#prat-badge.prat-over #prat-bar-fill { background: #cf222e; }
+#prat-badge.prat-over #prat-label    { color: #cf222e; }

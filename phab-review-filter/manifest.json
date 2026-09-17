@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+  "name": "Phabricator Review Age Filter",
+  "version": "1.0",
+  "description": "In your review queue, show only revisions that have been waiting 48+ hours without a review touch.",
+  "permissions": [
+    "*://phabricator.services.mozilla.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://phabricator.services.mozilla.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
