@@ -173,12 +173,14 @@ function getRowEpoch(row) {
     if (!isNaN(d)) return d.getTime();
   }
 
-  // 5. Scan all td/span for any parseable date string (last resort)
+  // 5. Scan td/span/div for any parseable date string (last resort).
+  // Forward order so a container ("Yesterday, 11:09 PM") is found before
+  // any inner span that only holds the bare word "Yesterday".
   const anyDateRe = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Yesterday|Today|Just|\d+\s+\w+\s+ago|\d{1,2}:\d{2}\s*[AP]M)/i;
-  for (const el of [...row.querySelectorAll('td, span')].reverse()) {
-    if (el.children.length > 2) continue;
+  for (const el of row.querySelectorAll('td, span, div')) {
+    if (el.children.length > 3) continue;
     const text = el.textContent.trim();
-    if (anyDateRe.test(text) && text.length < 50) {
+    if (anyDateRe.test(text) && text.length < 60) {
       const ts = parseAnyDate(text);
       if (ts) return ts;
     }
