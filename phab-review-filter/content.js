@@ -266,6 +266,24 @@ function hasDirectAssignment(row, username) {
 // Direct-only assignments to smaug are always shown — the author specifically
 // needs him and no one else in the group can substitute.
 
+// Count only weekday (Mon–Fri) milliseconds in [startMs, endMs].
+// Saturday (day 6) and Sunday (day 0) are excluded from the elapsed time,
+// so a review arriving Friday afternoon does not surface until it has
+// accumulated 24 weekday-hours of waiting — meaning Monday afternoon.
+function nonWeekendMs(startMs, endMs) {
+  let counted = 0;
+  let t = startMs;
+  while (t < endMs) {
+    const d = new Date(t);
+    const nextDay = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime();
+    const chunkEnd = Math.min(nextDay, endMs);
+    const day = d.getDay(); // 0 = Sun, 6 = Sat
+    if (day !== 0 && day !== 6) counted += chunkEnd - t;
+    t = nextDay;
+  }
+  return counted;
+}
+
 function applyFilter() {
   const threshMs = getThreshold() * 3600 * 1000;
   const now = Date.now();
@@ -292,11 +310,12 @@ function applyFilter() {
 
     const epoch = getRowEpoch(row);
     const unknownAge = epoch === null;
-    const ageH = unknownAge ? null : ((now - epoch) / 3600000).toFixed(1);
-    const isStale = !unknownAge && (now - epoch) > threshMs;
+    const effectiveMs = unknownAge ? null : nonWeekendMs(epoch, now);
+    const ageH = unknownAge ? null : (effectiveMs / 3600000).toFixed(1);
+    const isStale = !unknownAge && effectiveMs > threshMs;
     const hide = !isStale && !unknownAge;
     row.classList.toggle('praf-hidden', hide);
-    console.debug('[praf]', hide ? 'HIDE' : 'SHOW', `(${ageH}h)`, title);
+    console.debug('[praf]', hide ? 'HIDE' : 'SHOW', `(${ageH}h weekday)`, title);
   });
 }
 

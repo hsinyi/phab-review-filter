@@ -1,8 +1,14 @@
 {
   "manifest_version": 2,
   "name": "Phabricator Review Age Filter",
-  "version": "1.0",
-  "description": "In your review queue, show only revisions that have been waiting 48+ hours without a review touch.",
+  "version": "1.1",
+  "description": "In your review queue, hide group-routed reviews until they have been waiting 24 weekday hours (weekends excluded).",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "phab-review-filter@hsinyi.mozilla",
+      "strict_min_version": "109.0"
+    }
+  },
   "permissions": [
     "*://phabricator.services.mozilla.com/*"
   ],
