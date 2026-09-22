@@ -255,7 +255,12 @@ function hasGroupAssignment(row) {
 
 function hasDirectAssignment(row, username) {
   const target = username.toLowerCase();
+  // Exclude the right/side panel — it shows "Author: smaug", not reviewers.
+  // Matching the author link would wrongly treat the patch author as a direct
+  // reviewer and show the row unconditionally.
+  const rightSide = row.querySelector('.phui-oi-right, .phui-oi-side');
   for (const a of row.querySelectorAll('a')) {
+    if (rightSide && rightSide.contains(a)) continue;
     if (a.textContent.trim().toLowerCase() === target) return true;
   }
   return false;
