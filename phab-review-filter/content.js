@@ -44,7 +44,7 @@ function parseTextDate(raw) {
   text = text.replace(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+/i, '');
 
   const m = text.match(
-    /^([A-Za-z]{3})\s+(\d{1,2})(?:,?\s+(?:(\d{4})|(\d{1,2}:\d{2}\s*[APap][Mm])))?(?:,?\s+(\d{1,2}:\d{2}\s*[APap][Mm]))?/
+    /^([A-Za-z]{3})\s+(\d{1,2})(?:,?\s+(?:(\d{4})|(\d{1,2}:\d{2}(?:\s*[APap][Mm])?))?)?(?:,?\s+(\d{1,2}:\d{2}(?:\s*[APap][Mm])?))?/
   );
   if (!m) return null;
 
@@ -57,13 +57,16 @@ function parseTextDate(raw) {
   let hours = 0, mins = 0;
   const timeStr = m[4] || m[5];
   if (timeStr) {
-    const t = timeStr.match(/(\d+):(\d+)\s*([APap][Mm])/);
+    const t = timeStr.match(/(\d+):(\d+)(?:\s*([APap][Mm]))?/);
     if (t) {
       hours = parseInt(t[1], 10);
       mins  = parseInt(t[2], 10);
-      const pm = t[3].toUpperCase() === 'PM';
-      if (pm && hours !== 12) hours += 12;
-      if (!pm && hours === 12) hours = 0;
+      if (t[3]) {
+        const pm = t[3].toUpperCase() === 'PM';
+        if (pm && hours !== 12) hours += 12;
+        if (!pm && hours === 12) hours = 0;
+      }
+      // no t[3] → already 24h, no adjustment needed
     }
   }
 
@@ -73,7 +76,8 @@ function parseTextDate(raw) {
 
 // ── relative date parsing ─────────────────────────────────────────────────────
 // Handles formats Phabricator switches to after midnight:
-//   "Yesterday, 12:20 PM"  "Today, 12:20 PM"  "12:20 PM"
+//   "Yesterday, 12:20 PM"  "Today, 12:20 PM"  "12:20 PM"  (12h)
+//   "Yesterday, 18:56"     "Today, 18:56"     "18:56"      (24h)
 //   "14 hours ago"  "5 minutes ago"  "2 days ago"  "Just now"
 
 function parseRelativeDate(raw) {
@@ -92,15 +96,17 @@ function parseRelativeDate(raw) {
     return now - n * ms[unit];
   }
 
-  // Extract optional time suffix "12:20 PM"
+  // Extract optional time suffix — handles both "12:20 PM" and "18:56" (24h).
   function applyTime(base, timeStr) {
     if (!timeStr) return base;
-    const t = timeStr.match(/(\d+):(\d+)\s*([APap][Mm])/);
+    const t = timeStr.match(/(\d+):(\d+)(?:\s*([APap][Mm]))?/);
     if (!t) return base;
     let h = parseInt(t[1], 10), m = parseInt(t[2], 10);
-    const pm = t[3].toUpperCase() === 'PM';
-    if (pm && h !== 12) h += 12;
-    if (!pm && h === 12) h = 0;
+    if (t[3]) {
+      const pm = t[3].toUpperCase() === 'PM';
+      if (pm && h !== 12) h += 12;
+      if (!pm && h === 12) h = 0;
+    }
     const d = new Date(base);
     d.setHours(h, m, 0, 0);
     return d.getTime();
@@ -120,8 +126,8 @@ function parseRelativeDate(raw) {
     return applyTime(d.getTime(), tod[1]);
   }
 
-  // Bare time "12:20 PM" with no date prefix → assume today
-  if (/^\d{1,2}:\d{2}\s*[APap][Mm]$/.test(text)) {
+  // Bare time "12:20 PM" or "18:56" with no date prefix → assume today
+  if (/^\d{1,2}:\d{2}(?:\s*[APap][Mm])?$/.test(text)) {
     const d = new Date(); d.setHours(0, 0, 0, 0);
     return applyTime(d.getTime(), text);
   }
@@ -176,7 +182,7 @@ function getRowEpoch(row) {
   // 5. Scan td/span/div for any parseable date string (last resort).
   // Forward order so a container ("Yesterday, 11:09 PM") is found before
   // any inner span that only holds the bare word "Yesterday".
-  const anyDateRe = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Yesterday|Today|Just|\d+\s+\w+\s+ago|\d{1,2}:\d{2}\s*[AP]M)/i;
+  const anyDateRe = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Yesterday|Today|Just|\d+\s+\w+\s+ago|\d{1,2}:\d{2}(?:\s*[AP]M)?)/i;
   for (const el of row.querySelectorAll('td, span, div')) {
     if (el.children.length > 3) continue;
     const text = el.textContent.trim();
