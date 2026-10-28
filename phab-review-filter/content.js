@@ -21,9 +21,9 @@ function detectCurrentUser() {
 const DEFAULT_HOURS = 24;  // hide reviews newer than this many hours
 // Experimenter toggle: Alt+Shift+F (not shown in the page UI)
 
-// Current user. Hard-coded to 'smaug' for the experiment.
+// Current user. Hard-coded to 'hsinyi' for the experiment.
 // To switch to whoever is logged in, swap the two lines below:
-const CURRENT_USER = 'smaug';
+const CURRENT_USER = 'hsinyi';
 // const CURRENT_USER = detectCurrentUser();
 // ─────────────────────────────────────────────────────────────────────────────
 
